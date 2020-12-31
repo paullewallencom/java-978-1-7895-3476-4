@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spelling-service
+  labels:
+    app: spelling-service
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    name: http
+  selector:
+    app: spelling-service
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: spelling-service-v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: spelling-service
+        version: v1
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
+    spec:
+      containers:
+      - name: spelling-service
+        image: lreimer/spelling-service:1.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        # we can not use livenessProbe and readinessProbe with mutual TLS        
